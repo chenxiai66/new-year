@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>新春祝福游戏</title>
+    <style>
+        body { 
+            margin: 0; 
+            background: #ffe6e6; 
+            font-family: '华文行楷', cursive;
+            overflow: hidden;
+        }
+        
+        /* 游戏容器 */
+        .game-container {
+            position: relative;
+            height: 100vh;
+        }
+
+        /* 祝福词样式 */
+        .word {
+            position: absolute;
+            padding: 10px;
+            border: 2px solid #ff3366;
+            border-radius: 20px;
+            animation: fall 10s linear;
+            cursor: pointer;
+            background: white;
+            font-size: 24px;
+        }
+
+        /* 烟花特效 */
+        .firework {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffeb3b;
+            animation: explode 1s infinite;
+        }
+
+        /* 规则说明 */
+        .rules {
+            position: fixed;
+            bottom: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.8);
+            width: 90%;
+            left: 5%;
+        }
+
+        /* 动画定义 */
+        @keyframes fall {
+            from { top: -50px; }
+            to { top: 100vh; }
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 第一环节 -->
+    <div id="game1" class="game-container">
+        <div id="score" style="position:fixed;top:10px;left:10px;font-size:24px;color:#ff3366;">得分：0</div>
+        <div class="rules">
+            游戏规则：点击祝福词得分（10秒内）<br>
+            祝福词：升职加薪、变美、暴富、健康...<br>
+            普通词：加班、变胖、熬夜、堵车...
+        </div>
+    </div>
+
+    <!-- 第二环节 -->
+    <div id="game2" class="game-container" style="display:none;">
+        <h2 style="text-align:center;color:#ff3366;">生生不息，事事如意</h2>
+        <div id="wishResult" style="text-align:center;margin-top:20vh;font-size:28px;"></div>
+        <button id="wishBtn" style="display:block;margin:20px auto;padding:15px 30px;background:#ff3366;color:white;border:none;border-radius:25px;">立即许愿</button>
+        <div style="position:fixed;bottom:10px;width:100%;text-align:center;color:#666;">蛇年进行时</div>
+    </div>
+
+<script>
+// 第一环节逻辑
+const blessings = ['升职加薪','变美','暴富','健康','幸福','脱单','好运','发财','平安','长寿'];
+const normalWords = ['加班','变胖','熬夜','堵车','失眠','迟到','吵架','丢钱','生病','分手'];
+let score = 0;
+let timeLeft = 10;
+
+function createWord() {
+    const word = document.createElement('div');
+    const isBlessing = Math.random() > 0.4;
+    word.className = 'word';
+    word.style.left = Math.random() * 90 + '%';
+    word.innerHTML = isBlessing 
+        ? blessings[Math.floor(Math.random()*blessings.length)]
+        : normalWords[Math.floor(Math.random()*normalWords.length)];
+    
+    word.onclick = function() {
+        if(isBlessing) {
+            score++;
+            document.getElementById('score').innerHTML = `得分：${score}`;
+        }
+        this.style.display = 'none';
+    }
+    document.getElementById('game1').appendChild(word);
+}
+
+// 游戏启动
+let gameTimer = setInterval(() => {
+    if(timeLeft <= 0) {
+        clearInterval(gameTimer);
+        endGame();
+        return;
+    }
+    createWord();
+    timeLeft--;
+}, 333);
+
+function endGame() {
+    const result = score > 5 
+        ? '恭喜通关，进入第二个环节' 
+        : '再接再厉！';
+    alert(`得分：${score}\n${result}`);
+    if(score > 5) {
+        document.getElementById('game1').style.display = 'none';
+        document.getElementById('game2').style.display = 'block';
+    }
+}
+
+// 第二环节逻辑
+const wishes = ['事业腾达','家庭和睦','财运亨通','健康长寿','心想事成','步步高升','爱情甜蜜','学业进步','万事如意','上上签','吉星高照','福寿双全','金玉满堂','笑口常开','青春永驻','一帆风顺','二龙腾飞','三阳开泰','四季平安','五福临门'];
+
+document.getElementById('wishBtn').onclick = function() {
+    this.style.display = 'none';
+    let count = 0;
+    const wishInterval = setInterval(() => {
+        document.getElementById('wishResult').innerHTML = 
+            (count === 3 ? '上上签·' : '') + wishes[Math.floor(Math.random()*wishes.length)];
+        count++;
+        if(count === 3) {
+            clearInterval(wishInterval);
+            setTimeout(() => {
+                document.getElementById('wishResult').style.opacity = 1;
+                document.getElementById('wishResult').innerHTML = 
+                    '秉雯恭祝您新春万事大吉，平安喜乐，所求皆所得';
+                // 添加烟花特效
+                setInterval(createFirework, 300);
+            }, 3000);
+        }
+    }, 100);
+}
+
+function createFirework() {
+    const fw = document.createElement('div');
+    fw.className = 'firework';
+    fw.style.left = Math.random() * 90 + '%';
+    fw.style.top = Math.random() * 90 + '%';
+    document.getElementById('game2').appendChild(fw);
+    setTimeout(() => fw.remove(), 1000);
+}
+</script>
+</body>
+</html>
