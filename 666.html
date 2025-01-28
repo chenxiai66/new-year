@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @font-face {font-family: 'STXingkai'; src: url('//fontlibrary.org/face/stxingkai')}
+        
+        body {
+            margin: 0;
+            background: #ffe6e6;
+            font-family: 'STXingkai', cursive;
+            overflow: hidden;
+        }
+
+        /* 第一环节样式 */
+        #game1 {
+            position: relative;
+            height: 100vh;
+        }
+        .word {
+            position: absolute;
+            padding: 8px 15px;
+            border: 2px solid #ff3366;
+            border-radius: 20px;
+            margin: 5px;
+            animation: fall 3s linear;
+            cursor: pointer;
+            background: #fff0f5;
+        }
+        @keyframes fall {
+            from { top: -50px; }
+            to { top: 100vh; }
+        }
+        
+        /* 第二环节样式 */
+        #game2 {
+            display: none;
+            height: 100vh;
+            background: #ffebeb;
+            position: relative;
+        }
+        .firework {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffd700;
+            animation: explode 1s ease-out;
+        }
+        .snake {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 80px;
+            background: #4CAF50;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <!-- 第一环节 -->
+    <div id="game1">
+        <h2 id="score" style="text-align:center;color:#ff3366">得分：0</h2>
+        <div id="rules" style="position:fixed;bottom:10px;font-size:12px">
+            游戏规则：点击祝福词得分，10秒内得5分即可通关
+        </div>
+    </div>
+
+    <!-- 第二环节 -->
+    <div id="game2">
+        <h2 style="text-align:center;color:#ff3366">生生不息，事事如意</h2>
+        <button id="wishBtn" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">
+            🎋 点击许愿
+        </button>
+        <div class="snake">
+            <div style="position:absolute;width:30px;height:30px;background:#fff;border-radius:50%;top:10px;left:35px"></div>
+            <div style="position:absolute;width:15px;height:15px;background:#000;border-radius:50%;top:20px;left:45px"></div>
+        </div>
+    </div>
+
+<script>
+// 第一环节逻辑
+const blessings = ['心想事成', '万事如意', '平安喜乐', '阖家欢乐', '吉祥安康',
+                  '财源广进', '步步高升', '幸福美满', '健康长寿', '新春大吉'];
+const normalWords = ['日常', '普通', '一般', '平常', '简单', '重复', '常规', '标准'];
+
+let score = 0;
+let gameActive = true;
+
+function createWord() {
+    const word = document.createElement('div');
+    const isBlessing = Math.random() > 0.4;
+    word.className = 'word';
+    word.style.left = Math.random() * 90 + '%';
+    word.innerText = isBlessing ? 
+        blessings[Math.floor(Math.random()*blessings.length)] :
+        normalWords[Math.floor(Math.random()*normalWords.length)];
+    
+    word.onclick = () => {
+        if(!gameActive) return;
+        if(isBlessing) {
+            score++;
+            document.getElementById('score').innerText = `得分：${score}`;
+            word.style.backgroundColor = '#ffcccc';
+        }
+        word.style.animation = 'none';
+        setTimeout(() => word.remove(), 300);
+    }
+    document.getElementById('game1').appendChild(word);
+}
+
+// 游戏计时
+setTimeout(() => {
+    gameActive = false;
+    const result = score >=5 ? 
+        '恭喜通关，进入第二个环节' : '再接再厉';
+    alert(result);
+    if(score >=5) {
+        document.getElementById('game1').style.display = 'none';
+        document.getElementById('game2').style.display = 'block';
+    }
+}, 10000);
+
+// 生成词语
+for(let i=0; i<30; i++) {
+    setTimeout(createWord, i*300);
+}
+
+// 第二环节逻辑
+const wishes = [...blessings, '金蛇狂舞','灵蛇送福','祥蛇吐瑞','吉蛇纳福','瑞蛇迎春'];
+document.getElementById('wishBtn').onclick = function() {
+    this.disabled = true;
+    let count = 0;
+    const anim = setInterval(() => {
+        this.innerText = wishes[Math.floor(Math.random()*wishes.length)];
+        if(++count === 30) {
+            clearInterval(anim);
+            this.innerHTML = `<div style="color:gold">上上签</div>${this.innerText}`;
+            setTimeout(() => {
+                document.body.innerHTML += `
+                    <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+                        animation: fadeIn 2s;font-size:24px;color:#ff3366">
+                        秉雯恭祝您新春万事大吉，平安喜乐，所求皆所得
+                    </div>`;
+            }, 2500);
+        }
+    }, 100);
+    
+    // 烟花效果
+    setInterval(() => {
+        const fw = document.createElement('div');
+        fw.className = 'firework';
+        fw.style.left = Math.random()*100 + 'vw';
+        fw.style.top = Math.random()*100 + 'vh';
+        document.body.appendChild(fw);
+        setTimeout(() => fw.remove(), 1000);
+    }, 300);
+}
+</script>
+</body>
+</html>
