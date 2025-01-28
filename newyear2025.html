@@ -1,0 +1,199 @@
+<!-- 第一环节：收集祝福 -->
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            background: #FFB6C1;
+            overflow: hidden;
+            font-family: '华文行楷', cursive;
+        }
+        #gameArea {
+            position: relative;
+            height: 80vh;
+        }
+        .word {
+            position: absolute;
+            font-size: 28px;
+            padding: 10px;
+            border: 2px solid red;
+            border-radius: 20px;
+            animation: fall 8s linear;
+            cursor: pointer;
+        }
+        @keyframes fall {
+            from { top: -50px; }
+            to { top: 100vh; }
+        }
+        #rules {
+            position: fixed;
+            bottom: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #score {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">得分：0</div>
+    <div id="gameArea"></div>
+    <div id="rules">
+        游戏规则：点击祝福词汇得分（2/4字），10秒内得分≥5通关<br>
+        祝福词示例：心想事成、万事如意、平安喜乐
+    </div>
+
+    <script>
+        const blessings = ['心想事成','万事如意','平安喜乐','吉祥安康','年年有余',
+                         '步步高升','阖家幸福','财源广进','身体健康','学业进步'];
+        const normalWords = ['春暖花开','阳光明媚','清风明月','云淡风轻','风和日丽',
+                           '朝霞满天','繁星点点','鸟语花香','青山绿水','蓝天白云'];
+        let score = 0;
+        let isPlaying = true;
+
+        function createWord() {
+            const word = document.createElement('div');
+            const isBlessing = Math.random() < 0.5;
+            word.className = 'word';
+            word.textContent = isBlessing ? 
+                blessings[Math.floor(Math.random()*10)] :
+                normalWords[Math.floor(Math.random()*10)];
+            word.style.left = Math.random()*90 + '%';
+            word.onclick = () => {
+                if(!isPlaying) return;
+                if(isBlessing) {
+                    score++;
+                    document.getElementById('score').textContent = `得分：${score}`;
+                }
+                word.remove();
+            };
+            document.getElementById('gameArea').appendChild(word);
+        }
+
+        // 游戏开始
+        const wordInterval = setInterval(createWord, 300);
+        setTimeout(() => {
+            clearInterval(wordInterval);
+            isPlaying = false;
+            const result = score >=5 ? 
+                "恭喜通关，进入第二个环节" : 
+                "再接再厉";
+            document.getElementById('gameArea').innerHTML = `
+                <h1 style="text-align:center">${result}</h1>
+                ${score >=5 ? '<button onclick="location.href=\'second.html\'">进入第二环节</button>' : ''}
+            `;
+        }, 10000);
+    </script>
+</body>
+</html>
+<!-- 第二环节：许愿游戏（保存为second.html） -->
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            background: rgba(255,182,193,0.5);
+            height: 100vh;
+            font-family: '华文楷体', cursive;
+        }
+        #header {
+            font-size: 32px;
+            text-align: center;
+            padding: 20px;
+        }
+        #wishArea {
+            text-align: center;
+            margin-top: 20vh;
+            font-size: 48px;
+        }
+        #timer {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 24px;
+        }
+        .firework {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: gold;
+            animation: explode 1s ease-out;
+        }
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(5); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="header">生生不息，事事如意</div>
+    <div id="wishArea">
+        <button onclick="startWish()" style="font-size:24px">点击许愿</button>
+    </div>
+    <div id="timer"></div>
+
+    <script>
+        const wishes = ['金蛇纳福','福运双至','祥瑞满堂','吉星高照','时来运转',
+                       '财运亨通','健康长寿','家和万事','步步高升','心想事成',
+                       '平安顺遂','学业有成','幸福美满','鸿运当头','福寿安康',
+                       '万事顺意','吉祥如意','五福临门','瑞气东来','喜气洋洋'];
+        
+        function createFirework() {
+            const fw = document.createElement('div');
+            fw.className = 'firework';
+            fw.style.left = Math.random()*95 + '%';
+            fw.style.top = Math.random()*80 + '%';
+            document.body.appendChild(fw);
+            setTimeout(() => fw.remove(), 1000);
+        }
+
+        function startWish() {
+            let count = 0;
+            const wishInterval = setInterval(() => {
+                document.getElementById('wishArea').innerHTML = 
+                    wishes[Math.floor(Math.random()*20)];
+                if(count++ >= 30) clearInterval(wishInterval);
+            }, 100);
+
+            setTimeout(() => {
+                clearInterval(wishInterval);
+                const finalWish = wishes[Math.floor(Math.random()*20)];
+                document.getElementById('wishArea').innerHTML = `
+                    <div style="color:gold">上上签</div>
+                    ${finalWish}
+                    <div style="font-size:24px;opacity:0" id="blessing">
+                        秉雯恭祝您新春万事大吉，平安喜乐，所求皆所得！
+                    </div>
+                `;
+                setTimeout(() => {
+                    document.getElementById('blessing').style.opacity = 1;
+                    document.getElementById('blessing').style.transition = 'opacity 2s';
+                }, 500);
+            }, 3000);
+
+            // 烟花效果
+            const fireworkInterval = setInterval(createFirework, 200);
+            setTimeout(() => clearInterval(fireworkInterval), 10000);
+        }
+
+        // 时间显示
+        setInterval(() => {
+            const start = new Date('2025-01-29T00:00:00');
+            const now = new Date();
+            const diff = now - start;
+            const days = Math.floor(diff / 86400000);
+            const hours = Math.floor((diff % 86400000) / 3600000);
+            const mins = Math.floor((diff % 3600000) / 60000);
+            document.getElementById('timer').innerHTML = 
+                `蛇年进行时：${days}天${hours}时${mins}分`;
+        }, 1000);
+    </script>
+</body>
+</html>
