@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>蛇年吉祥</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #ffe6e6;
+            font-family: '微软雅黑', sans-serif;
+        }
+        
+        #header, #footer {
+            position: fixed;
+            width: 100%;
+            text-align: center;
+            color: #c00;
+            z-index: 2;
+            padding: 10px;
+            background: rgba(255,230,230,0.8);
+        }
+        
+        #header { top: 0; }
+        #footer { bottom: 0; }
+        
+        #game-container {
+            position: relative;
+            margin-top: 60px;
+            height: 80vh;
+        }
+        
+        canvas {
+            border: 2px solid #c00;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        #wish-section {
+            display: none;
+            text-align: center;
+            padding-top: 100px;
+        }
+        
+        #wish-btn {
+            padding: 15px 30px;
+            background: #c00;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        #wish-result {
+            font-size: 28px;
+            color: #c00;
+            margin-top: 20px;
+            min-height: 40px;
+        }
+        
+        .firework {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, #ff0, #f90, #f00);
+            border-radius: 50%;
+            animation: explode 1.5s ease-out forwards;
+        }
+        
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(5); opacity: 0; }
+        }
+        
+        #blessing {
+            opacity: 0;
+            transition: opacity 2s;
+            font-size: 24px;
+            color: #c00;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">生生不息，事事如意</div>
+    <div id="footer">蛇年进行时</div>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="300" height="300"></canvas>
+        <div id="wish-section">
+            <button id="wish-btn">点击许愿</button>
+            <div id="wish-result"></div>
+            <div id="blessing"></div>
+        </div>
+    </div>
+
+    <script>
+        // 贪吃蛇游戏逻辑
+        let snake = [{x: 150, y: 150}];
+        let food = {x: 200, y: 200};
+        let dx = 10, dy = 0;
+        let gameLoop;
+
+        function initGame() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            function draw() {
+                ctx.clearRect(0, 0, 300, 300);
+                
+                // 绘制蛇
+                ctx.fillStyle = '#c00';
+                snake.forEach(segment => {
+                    ctx.fillRect(segment.x, segment.y, 10, 10);
+                });
+
+                // 绘制食物
+                ctx.fillStyle = '#0c0';
+                ctx.fillRect(food.x, food.y, 10, 10);
+            }
+
+            function move() {
+                const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+                snake.unshift(head);
+                
+                if(head.x === food.x && head.y === food.y) {
+                    // 自动通关逻辑
+                    document.getElementById('gameCanvas').style.display = 'none';
+                    document.getElementById('wish-section').style.display = 'block';
+                    clearInterval(gameLoop);
+                } else {
+                    snake.pop();
+                }
+                draw();
+            }
+
+            gameLoop = setInterval(move, 100);
+        }
+
+        // 许愿逻辑
+        const blessings = [
+            "金蛇献瑞", "蛇运连连", "福寿安康", 
+            "吉星高照", "财运亨通", "心想事成",
+            "阖家幸福", "步步高升", "龙马精神",
+            "年年有余", "上上签", "吉祥如意",
+            "五福临门", "万事顺遂", "平安喜乐",
+            "福寿双全", "瑞气盈门", "春风得意",
+            "时来运转", "鸿运当头"
+        ];
+
+        document.getElementById('wish-btn').addEventListener('click', function() {
+            this.disabled = true;
+            let counter = 0;
+            const wishResult = document.getElementById('wish-result');
+            const interval = setInterval(() => {
+                wishResult.textContent = blessings[Math.floor(Math.random()*20)];
+                counter++;
+                if(counter >= 30) { // 3秒后停止
+                    clearInterval(interval);
+                    const finalBlessing = blessings.includes("上上签") ? "上上签" : 
+                        blessings[Math.floor(Math.random()*20)];
+                    wishResult.innerHTML = `✨<span style="color:gold">${finalBlessing}</span>✨`;
+                    document.getElementById('blessing').style.opacity = 1;
+                    startFireworks(10);
+                }
+            }, 100);
+        });
+
+        // 烟花特效
+        function startFireworks(duration) {
+            const interval = setInterval(createFirework, 300);
+            setTimeout(() => clearInterval(interval), duration*1000);
+        }
+
+        function createFirework() {
+            const firework = document.createElement('div');
+            firework.className = 'firework';
+            firework.style.left = Math.random()*100 + '%';
+            firework.style.top = Math.random()*100 + '%';
+            document.body.appendChild(firework);
+            setTimeout(() => firework.remove(), 1500);
+        }
+
+        // 初始化
+        initGame();
+        startFireworks(1000);
+        setTimeout(() => {
+            document.getElementById('blessing').textContent = 
+                "秉雯恭祝您新春万事大吉，平安喜乐，所求皆所得";
+        }, 3000);
+    </script>
+</body>
+</html>
