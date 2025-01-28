@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新春祝福游戏</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #ffe6e6;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        .header, .footer {
+            position: fixed;
+            width: 100%;
+            background: rgba(255,230,230,0.9);
+            padding: 10px;
+            text-align: center;
+            z-index: 100;
+        }
+        .header { top: 0; }
+        .footer { bottom: 0; }
+        #gameArea {
+            height: 80vh;
+            margin: 60px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .word {
+            position: absolute;
+            cursor: pointer;
+            font-size: 24px;
+            transition: transform 0.1s;
+        }
+        #result {
+            text-align: center;
+            padding: 20px;
+        }
+        #wishResult {
+            font-size: 32px;
+            color: #c00;
+            margin: 20px;
+        }
+        .firework {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: gold;
+            animation: explode 1s infinite;
+        }
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 第一环节 -->
+    <div id="stage1">
+        <div class="header">新春祝福收集</div>
+        <div id="gameArea"></div>
+        <div class="footer">
+            游戏规则：点击祝福词汇得1分，普通词汇不得分<br>
+            时间10秒，达到5分即可进入下一环节
+        </div>
+    </div>
+
+    <!-- 第三环节 -->
+    <div id="stage3" style="display:none;">
+        <div class="header">生生不息，事事如意</div>
+        <div id="wishArea" style="text-align:center;padding:50px 0">
+            <button id="wishBtn" style="font-size:24px;padding:15px">立即许愿</button>
+            <div id="wishResult"></div>
+            <div id="finalWish" style="opacity:0;transition:opacity 2s;"></div>
+        </div>
+        <div class="footer">蛇年进行时</div>
+    </div>
+
+<script>
+// 第一环节数据
+const blessings = ['福星高照', '万事如意', '恭喜发财', '吉祥如意', '年年有余', 
+                  '心想事成', '阖家欢乐', '步步高升', '健康长寿', '金玉满堂'];
+const normalWords = ['吃饭', '睡觉', '工作', '开会', '洗衣', '扫地', '快递', '堵车', '排队', '缴费'];
+
+// 第三环节数据
+const wishes = new Array(19).fill('大吉大利').concat(['上上签']);
+wishes.push('蛇年吉祥','财源广进','福寿安康','万事顺遂','吉星高照','幸福美满');
+
+let score = 0;
+let gameActive = false;
+
+// 第一环节游戏逻辑
+function startGame() {
+    gameActive = true;
+    score = 0;
+    const gameArea = document.getElementById('gameArea');
+    
+    const timer = setInterval(() => {
+        if (!gameActive) return;
+        createWord();
+    }, 800);
+
+    setTimeout(() => {
+        gameActive = false;
+        clearInterval(timer);
+        showResult();
+    }, 10000);
+}
+
+function createWord() {
+    const word = document.createElement('div');
+    const isBlessing = Math.random() > 0.4;
+    word.className = 'word';
+    word.style.left = Math.random() * 90 + '%';
+    word.style.top = '-50px';
+    word.textContent = isBlessing 
+        ? blessings[Math.floor(Math.random()*blessings.length)]
+        : normalWords[Math.floor(Math.random()*normalWords.length)];
+    
+    word.onclick = () => {
+        if (!gameActive) return;
+        if (isBlessing) score++;
+        word.style.transform = 'scale(1.5)';
+        setTimeout(() => word.remove(), 200);
+    };
+    
+    gameArea.appendChild(word);
+    animateWord(word);
+}
+
+function animateWord(element) {
+    let pos = -50;
+    const move = () => {
+        pos += 3;
+        element.style.top = pos + 'px';
+        if (pos < window.innerHeight) requestAnimationFrame(move);
+        else element.remove();
+    }
+    requestAnimationFrame(move);
+}
+
+function showResult() {
+    const result = document.getElementById('result');
+    document.getElementById('stage1').style.display = 'none';
+    document.getElementById('stage3').style.display = 'block';
+    if (score > 5) {
+        startWishGame();
+    }
+}
+
+// 第三环节游戏逻辑
+function startWishGame() {
+    let count = 0;
+    const wishBtn = document.getElementById('wishBtn');
+    const finalWish = document.getElementById('finalWish');
+    
+    wishBtn.onclick = () => {
+        wishBtn.disabled = true;
+        const interval = setInterval(() => {
+            document.getElementById('wishResult').textContent = 
+                wishes[Math.floor(Math.random()*wishes.length)];
+        }, 50);
+
+        setTimeout(() => {
+            clearInterval(interval);
+            const final = wishes[Math.floor(Math.random()*wishes.length)];
+            document.getElementById('wishResult').innerHTML = 
+                final === '上上签' ? '🎉上上签🎉' : final;
+            
+            setTimeout(() => {
+                finalWish.style.opacity = 1;
+                finalWish.innerHTML = '秉雯恭祝您新春万事大吉，平安喜乐，所求皆所得';
+            }, 3000);
+
+            // 添加烟花效果
+            setInterval(createFirework, 300);
+        }, 3000);
+    };
+}
+
+function createFirework() {
+    const firework = document.createElement('div');
+    firework.className = 'firework';
+    firework.style.left = Math.random() * 90 + '%';
+    firework.style.top = Math.random() * 90 + '%';
+    document.body.appendChild(firework);
+    setTimeout(() => firework.remove(), 1000);
+}
+
+// 开始游戏
+startGame();
+</script>
+</body>
+</html>
