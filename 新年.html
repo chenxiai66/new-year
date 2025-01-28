@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>春节快乐</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #000;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 2;
+        }
+
+        .greeting {
+            color: #FFD700;
+            font-size: 2em;
+            font-family: '楷体', cursive;
+            opacity: 0;
+            animation: fadeIn 2s forwards;
+            text-shadow: 0 0 10px #ff0000;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="greeting" id="greeting"></div>
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        // 渐进文字显示
+        const greetingText = "渐进显示祝王总春节快乐";
+        let index = 0;
+        const greetingElement = document.getElementById('greeting');
+
+        function typeWriter() {
+            if (index < greetingText.length) {
+                greetingElement.innerHTML += greetingText.charAt(index);
+                index++;
+                setTimeout(typeWriter, 200);
+            }
+        }
+
+        setTimeout(typeWriter, 1000);
+
+        // 烟花特效
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.angle = Math.random() * Math.PI * 2;
+                this.v = Math.random() * 5 + 2;
+                this.radius = Math.random() * 2;
+                this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                this.alpha = 1;
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.alpha;
+                ctx.fill();
+            }
+
+            update() {
+                this.x += Math.cos(this.angle) * this.v;
+                this.y += Math.sin(this.angle) * this.v + 1;
+                this.alpha -= 0.01;
+                return this.alpha > 0;
+            }
+        }
+
+        class Firework {
+            constructor() {
+                this.particles = [];
+                for (let i = 0; i < 100; i++) {
+                    this.particles.push(new Particle(
+                        Math.random() * window.innerWidth,
+                        Math.random() * window.innerHeight
+                    ));
+                }
+            }
+
+            animate(ctx) {
+                this.particles = this.particles.filter(particle => {
+                    particle.update();
+                    particle.draw(ctx);
+                    return particle.alpha > 0;
+                });
+            }
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const fireworks = [];
+
+        function createFirework() {
+            fireworks.push(new Firework());
+            if (fireworks.length > 5) fireworks.shift();
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            fireworks.forEach(firework => firework.animate(ctx));
+            requestAnimationFrame(animate);
+        }
+
+        setInterval(createFirework, 1500);
+        animate();
+
+        // 窗口大小调整监听
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
