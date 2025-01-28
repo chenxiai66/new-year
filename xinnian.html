@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>蛇年许愿签</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #c7000b;
+            overflow: hidden;
+            position: relative;
+            font-family: '楷体', cursive;
+        }
+
+        #wishButton {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            font-size: 26px;
+            background: #FFD700;
+            color: #c7000b;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+
+        #countdown {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: #FFD700;
+            font-size: 20px;
+            z-index: 2;
+        }
+
+        .blessing-container {
+            position: absolute;
+            top: 30%;
+            width: 100%;
+            text-align: center;
+            z-index: 2;
+        }
+
+        #blessingText {
+            color: #FFD700;
+            font-size: 32px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .wish-card {
+            background: rgba(255, 215, 0, 0.1);
+            border: 3px solid #FFD700;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 80%;
+            margin: 20px auto;
+            display: none;
+            animation: cardShow 0.5s ease;
+        }
+
+        @keyframes cardShow {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        #finalGreeting {
+            position: fixed;
+            bottom: 100px;
+            width: 100%;
+            text-align: center;
+            color: #FFD700;
+            font-size: 24px;
+            opacity: 0;
+            white-space: nowrap;
+        }
+
+        .firework {
+            position: absolute;
+            pointer-events: none;
+            animation: firework 1s ease-out;
+        }
+
+        @keyframes firework {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <button id="wishButton">🐍 点击许愿</button>
+    <div class="blessing-container">
+        <div id="blessingText"></div>
+        <div class="wish-card" id="wishCard"></div>
+    </div>
+    <div id="finalGreeting"></div>
+    <div id="countdown"></div>
+
+    <script>
+        // 蛇年倒计时（2025年春节）
+        function updateCountdown() {
+            const snakeYear = new Date('2025-01-29T00:00:00+08:00').getTime();
+            const now = new Date().getTime();
+            const diff = snakeYear - now;
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            document.getElementById('countdown').innerHTML = 
+                `距离甲巳蛇年还有：${days}天 ${hours}时 ${minutes}分`;
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // 祝福语配置
+        const blessings = [
+            "金蛇纳福", "祥瑞满堂", 
+            "灵蛇送吉", "福运双至",
+            "财源广进", "健康平安",
+            "步步高升", "万事如意"
+        ];
+
+        // 许愿流程
+        document.getElementById('wishButton').addEventListener('click', function() {
+            this.style.display = 'none';
+            startFireworks();
+            
+            // 祝福语滚动
+            let counter = 0;
+            const blessAnim = setInterval(() => {
+                document.getElementById('blessingText').textContent = 
+                    blessings[counter++ % blessings.length];
+            }, 150);
+
+            // 3秒后定格
+            setTimeout(() => {
+                clearInterval(blessAnim);
+                const finalBless = blessings[Math.floor(Math.random()*blessings.length)];
+                document.getElementById('wishCard').style.display = 'block';
+                document.getElementById('wishCard').textContent = finalBless;
+            }, 3000);
+
+            // 4秒后显示最终祝福
+            setTimeout(() => {
+                const text = "恭祝宋微波新春万事大吉，平安喜乐";
+                let index = 0;
+                const greeting = document.getElementById('finalGreeting');
+                greeting.style.opacity = 1;
+                
+                function typeWriter() {
+                    if (index < text.length) {
+                        greeting.textContent += text.charAt(index++);
+                        setTimeout(typeWriter, 120);
+                    }
+                }
+                typeWriter();
+            }, 4000);
+
+            // 10秒后重置
+            setTimeout(() => {
+                location.reload();
+            }, 10000);
+        });
+
+        // 烟花特效
+        function startFireworks() {
+            function createFirework() {
+                const firework = document.createElement('div');
+                firework.className = 'firework';
+                firework.style.cssText = `
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    width: ${10 + Math.random() * 30}px;
+                    height: ${10 + Math.random() * 30}px;
+                    background: radial-gradient(circle, 
+                        hsl(${Math.random()*360}, 100%, 50%) 20%,
+                        rgba(255,255,255,0.8) 100%
+                    );
+                `;
+                document.body.appendChild(firework);
+                setTimeout(() => firework.remove(), 1000);
+            }
+            const fireInterval = setInterval(createFirework, 300);
+            setTimeout(() => clearInterval(fireInterval), 10000);
+        }
+    </script>
+</body>
+</html>
